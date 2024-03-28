@@ -1,0 +1,23 @@
+textarea {
+  min-height: 400px;
+}
+
+.mail-wrapper {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+
+  margin: 5px;
+  padding: 10px;
+
+  border-style: solid;
+  border-width: 1px;
+  border-color: darkgray;
+
+  div{
+    margin-right: 5px ;
+  }
+
+  .mail-timestamp {
+    text-align: right;
+  }
+}
