@@ -45,6 +45,7 @@ function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#reply-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
   document.querySelector('#mail-view').style.display = 'none';
 
@@ -59,6 +60,7 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
+  document.querySelector('#reply-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#mail-view').style.display = 'none';
 
@@ -88,6 +90,7 @@ function load_mailbox(mailbox) {
 
 function view_email(id){
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#reply-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#mail-view').style.display = 'block';
 
@@ -159,7 +162,7 @@ function view_email(id){
         const replyButton =  document.createElement('div');
         replyButton.innerHTML = 'Reply'
         replyButton.className = 'btn btn-light'
-        replyButton.addEventListener('click', reply())
+        replyButton.addEventListener('click', reply(email))
       }
 
     } else{
@@ -168,6 +171,11 @@ function view_email(id){
 
   })
 }
-function reply() {
+function reply(email) {
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#reply-view').style.display = 'block';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#mail-view').style.display = 'none';
+
 
 }
