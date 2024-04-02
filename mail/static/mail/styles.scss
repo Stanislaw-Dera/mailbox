@@ -2,6 +2,15 @@ textarea {
   min-height: 400px;
 }
 
+//.mail-anchor{
+//  text-decoration: none;
+//  color: inherit;
+//  &:hover{
+//    text-decoration: none;
+//    color: inherit;
+//  }
+//}
+
 .mail-wrapper {
   display: grid;
   grid-template-columns: auto auto 1fr;
@@ -20,4 +29,8 @@ textarea {
   .mail-timestamp {
     text-align: right;
   }
+}
+
+#buttons{
+  margin: 5px
 }
