@@ -21,5 +21,8 @@ textarea {
 #buttons {
   margin: 5px;
 }
+#buttons div {
+  margin-left: 10px;
+}
 
 /*# sourceMappingURL=styles.css.map */

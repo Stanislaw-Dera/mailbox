@@ -127,6 +127,14 @@ def email(request, email_id):
         }, status=400)
 
 
+@login_required()
+def current_user(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'email': request.user.email})
+    else:
+        return JsonResponse({'error': 'User Not logged in.'}, status=401)
+
+
 def login_view(request):
     if request.method == "POST":
 

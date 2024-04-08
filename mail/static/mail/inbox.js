@@ -45,22 +45,25 @@ function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#reply-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
   document.querySelector('#mail-view').style.display = 'none';
 
-  // Clear out composition fields
-  document.querySelector('#compose-recipients').value = '';
-  document.querySelector('#compose-subject').value = '';
-  document.querySelector('#compose-body').value = '';
-
+  if(arguments.length === 3){
+    document.querySelector('#compose-recipients').value = arguments[0];
+    document.querySelector('#compose-subject').value = arguments[1];
+    document.querySelector('#compose-body').value = arguments[2];
+  } else{
+    // Clear out composition fields
+    document.querySelector('#compose-recipients').value = '';
+    document.querySelector('#compose-subject').value = '';
+    document.querySelector('#compose-body').value = '';
+  }
 }
 
 function load_mailbox(mailbox) {
 
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
-  document.querySelector('#reply-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#mail-view').style.display = 'none';
 
@@ -90,7 +93,6 @@ function load_mailbox(mailbox) {
 
 function view_email(id){
   document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#reply-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#mail-view').style.display = 'block';
 
@@ -103,6 +105,16 @@ function view_email(id){
     console.log(email.id)
 
     if(email.id){
+      const bodyLines = email.body.split('\n')
+
+      const paragraphs = bodyLines.map((line) => {
+        const paragraph = document.createElement('p')
+        const textNode = document.createTextNode(line);
+        paragraph.appendChild(textNode);
+        return paragraph.outerHTML
+      })
+      const paragraphString = paragraphs.join('');
+
       mailField.innerHTML = `
         <div><strong>From: </strong>${email.sender}</div>
         <div><strong>To: </strong>${email.recipients}</div>
@@ -110,7 +122,7 @@ function view_email(id){
         <div><strong>Timestamp: </strong>${email.timestamp}</div>
         <div id="buttons"></div>
         <hr>
-        <div>${email.body}</div>
+        <div>${paragraphString}</div>
       `
       // mark email as read
       if(!email.read){
@@ -123,59 +135,74 @@ function view_email(id){
         .then(response => response.json());
       }
 
-      if(email.user !== email.sender){ //not in sent inbox
-        const archiveButton = document.createElement('div');
-        archiveButton.className = 'btn btn-light'
+      //so much code inside of fetch because I didn't want users to archive/reply to their own messages
+      fetch('/current_user')
+      .then(response => response.json())
+      .then((data) =>{
+        console.log('data: ', data)
+        const currentUser = data.email
 
-        //email not archived
-        if(!email.archived){
-          archiveButton.innerHTML = 'Archive'
+        // not in sent inbox
+        if(currentUser !== email.sender){
+          console.log()
+          console.log(email.sender)
+          console.log(email)
+          const archiveButton = document.createElement('div');
+          archiveButton.className = 'btn btn-light'
 
-          archiveButton.addEventListener('click', () => {
-            fetch(`/emails/${email.id}`, {
-              method: 'PUT',
-              body: JSON.stringify({
-                  archived: true
+          //email not archived
+          if(!email.archived){
+            archiveButton.innerHTML = 'Archive'
+
+            archiveButton.addEventListener('click', () => {
+              fetch(`/emails/${email.id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    archived: true
+                })
               })
+              .then(response => response.json());
+              view_email(email.id)
             })
-            .then(response => response.json());
-            view_email(email.id)
-          })
-        }
-        // archived
-        else{
-          archiveButton.innerHTML = 'Unarchive'
+          }
+          // archived
+          else{
+            archiveButton.innerHTML = 'Unarchive'
 
-          archiveButton.addEventListener('click', () => {
-            fetch(`/emails/${email.id}`, {
-              method: 'PUT',
-              body: JSON.stringify({
-                  archived: false
+            archiveButton.addEventListener('click', () => {
+              fetch(`/emails/${email.id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    archived: false
+                })
               })
+              .then(response => response.json());
+              view_email(email.id)
             })
-            .then(response => response.json());
-            view_email(email.id)
-          })
-        }
-        document.querySelector('#buttons').append(archiveButton) // surely it could be better designed
+          }
+          document.querySelector('#buttons').append(archiveButton) // surely it could be better designed
 
-        const replyButton =  document.createElement('div');
-        replyButton.innerHTML = 'Reply'
-        replyButton.className = 'btn btn-light'
-        replyButton.addEventListener('click', reply(email))
-      }
+          const replyButton =  document.createElement('div');
+          replyButton.innerHTML = 'Reply';
+          replyButton.className = 'btn btn-light';
+
+          let subject = email.subject;
+          subject = (!/^re:/i.test(subject)) ? 're: ' + subject: subject;
+
+          const body = `\n--------------\nOn ${email.timestamp} ${email.sender} wrote:\n${email.body}`
+          replyButton.addEventListener('click', () => compose_email(
+              email.sender,
+              subject,
+              body
+          ))
+          document.querySelector('#buttons').append(replyButton)
+        }
+      })
+
 
     } else{
       mailField.innerHTML = "Mail wasn't found. Contact the administrator. ";
     }
 
   })
-}
-function reply(email) {
-  document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#reply-view').style.display = 'block';
-  document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#mail-view').style.display = 'none';
-
-
 }
